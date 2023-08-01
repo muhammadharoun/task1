@@ -5,8 +5,15 @@ import random
 import string
 import jwt
 from datetime import datetime, timedelta
+from fastapi.openapi.utils import get_openapi
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.responses import HTMLResponse, JSONResponse
 
-app = FastAPI()
+app = FastAPI(
+    title="Sample API with JWT Authentication",
+    description="API to demonstrate JWT authentication with FastAPI",
+    version="1.0.0",
+)
 
 # In-memory database to store posts
 database = []
@@ -84,3 +91,9 @@ async def add_post(post: Post, token: str = Depends(decode_token)):
 async def get_posts(token: str = Depends(decode_token)):
     user_posts = [{"post_id": post["post_id"], "text": post["text"]} for post in database if post["user"] == token["sub"]]
     return user_posts
+
+
+@app.get("/docs", response_class=HTMLResponse)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="API Docs")
+
